@@ -1,4 +1,4 @@
-import { useState } from 'react'
+/*import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
@@ -32,4 +32,28 @@ function App() {
   )
 }
 
-export default App
+export default App*/
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Patients from "./pages/Patients";
+import AddPatient from "./pages/AddPatient";
+import MedicalRecords from "./pages/MedicalRecords";
+
+function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/patients" element={<Patients />} />
+                <Route path="/add-patient" element={<AddPatient />} />
+                <Route path="/medical-records" element={<MedicalRecords />} />
+            </Routes>
+        </BrowserRouter>
+    );
+}
+
+export default App;

@@ -327,7 +327,7 @@ function Login() {
                     <button
                         onClick={handleLogin}
                         disabled={loading}
-                        className="w-full bg-[#1C6E74] text-white py-3 rounded-lg font-medium hover:bg-[#155458] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-[#1C6E74] text-black py-3 rounded-lg font-medium hover:bg-[#155458] disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                     >
                         {loading && (
                             <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">

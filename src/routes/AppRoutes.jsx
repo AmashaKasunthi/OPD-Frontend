@@ -6,15 +6,19 @@ import Dashboard from "../pages/Dashboard";
 import Patients from "../pages/Patients";
 import AddPatient from "../pages/AddPatient";
 import MedicalRecords from "../pages/MedicalRecords";
+import ForgotPassword from "../pages/Forgotpassword";
 
 function AppRoutes() {
     return (
         <Routes>
             <Route path="/" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/patients" element={<Patients />} />
             <Route path="/add-patient" element={<AddPatient />} />
             <Route path="/medical-records" element={<MedicalRecords />} />
+            
         </Routes>
     );
 }

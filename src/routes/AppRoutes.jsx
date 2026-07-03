@@ -7,6 +7,7 @@ import Patients from "../pages/Patients";
 import AddPatient from "../pages/AddPatient";
 import MedicalRecords from "../pages/MedicalRecords";
 import ForgotPassword from "../pages/Forgotpassword";
+import EditPatient from "../pages/Editpatient";
 
 function AppRoutes() {
     return (
@@ -18,6 +19,7 @@ function AppRoutes() {
             <Route path="/patients" element={<Patients />} />
             <Route path="/add-patient" element={<AddPatient />} />
             <Route path="/medical-records" element={<MedicalRecords />} />
+            <Route path="/edit-patient/:id" element={<EditPatient />} />
             
         </Routes>
     );

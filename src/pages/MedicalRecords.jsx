@@ -157,7 +157,7 @@ function MedicalRecords() {
           {/* Submit */}
           <button
             onClick={submitRecord}
-            className="bg-[#1C6E74] hover:bg-[#15565B] text-white px-6 py-3 rounded-xl font-medium"
+            className="bg-[#1C6E74] hover:bg-[#15565B] text-black px-6 py-3 rounded-xl font-medium"
           >
             Save Record & Analyze Risk
           </button>

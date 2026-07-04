@@ -157,7 +157,7 @@ function Patients() {
                         `/medical-records/${patient.patientId}`
                       )
                     }
-                    className="px-3 py-2 rounded-lg bg-[#1C6E74] text-white text-sm hover:bg-[#15565B] transition-colors"
+                    className="px-3 py-2 rounded-lg bg-[#1C6E74] text-black text-sm hover:bg-[#15565B] transition-colors"
                     title="Add Medical Record"
                   >
                     Medical Record

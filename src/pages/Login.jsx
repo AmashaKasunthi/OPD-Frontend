@@ -82,6 +82,9 @@ function Login() {
             });
 
             localStorage.setItem("role", response.data.role);
+            localStorage.setItem("userId", response.data.userId);
+            // DEBUG (IMPORTANT)
+            console.log("userId:", response.data.userId);
 
             if (rememberMe) {
                 localStorage.setItem("opd_remember_email", email);

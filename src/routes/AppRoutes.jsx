@@ -20,6 +20,7 @@ function AppRoutes() {
             <Route path="/add-patient" element={<AddPatient />} />
             <Route path="/medical-records" element={<MedicalRecords />} />
             <Route path="/edit-patient/:id" element={<EditPatient />} />
+            <Route path="/medical-records/:patientId" element={<MedicalRecords />}/>
             
         </Routes>
     );

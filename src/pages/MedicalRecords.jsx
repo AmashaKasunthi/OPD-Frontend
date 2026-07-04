@@ -1,69 +1,171 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
 
 function MedicalRecords() {
-    const [record, setRecord] = useState({
-        symptoms: "",
-        bloodPressure: "",
-        temperature: "",
-        heartRate: "",
-        diagnosis: "",
-        riskLevel: ""
+  const { patientId } = useParams();
+  const navigate = useNavigate();
+
+  const [patient, setPatient] = useState(null);
+
+  const [record, setRecord] = useState({
+    symptoms: "",
+    bloodPressure: "",
+    temperature: "",
+    heartRate: "",
+    notes: "",
+    weight: ""
+  });
+
+  useEffect(() => {
+    fetchPatient();
+  }, []);
+
+  const fetchPatient = async () => {
+    try {
+      const response = await API.get(`/patients/${patientId}`);
+      setPatient(response.data);
+    } catch (error) {
+      console.error("Error loading patient:", error);
+    }
+  };
+
+  const handleChange = (e) => {
+    setRecord({
+      ...record,
+      [e.target.name]: e.target.value
     });
+  };
 
-    const handleChange = (e) => {
-        setRecord({
-            ...record,
-            [e.target.name]: e.target.value
-        });
-    };
+  const submitRecord = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
 
-    const submitRecord = async () => {
-        await API.post("/medical-records/1/2", record);
-        alert("Medical record added successfully");
-    };
+      // ✅ SAFE VALIDATION
+      if (!userId || userId === "null" || userId === "undefined") {
+        alert("Session expired. Please login again.");
+        navigate("/login");
+        return;
+      }
 
-    return (
-        <div>
-            <Navbar />
+      await API.post(
+        `/medical-records/${patientId}/${userId}`,
+        record
+      );
 
-            <div className="p-8 max-w-xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6">Medical Record</h2>
+      alert("Medical record added successfully");
 
-                <input name="symptoms" placeholder="Symptoms"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+      navigate(`/risk-analysis/${patientId}`);
 
-                <input name="bloodPressure" placeholder="Blood Pressure"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+    } catch (error) {
+      console.error("Error saving record:", error);
+      alert("Failed to save medical record");
+    }
+  };
 
-                <input name="temperature" placeholder="Temperature"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+  return (
+    <div className="min-h-screen bg-[#FBF8F3]">
+      <Navbar />
 
-                <input name="heartRate" placeholder="Heart Rate"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+      <div className="max-w-3xl mx-auto p-8">
 
-                <input name="diagnosis" placeholder="Diagnosis"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+        <h2 className="text-3xl font-semibold text-[#0E2A38] mb-6">
+          Medical Record
+        </h2>
 
-                <input name="riskLevel" placeholder="Risk Level"
-                    className="w-full border p-3 rounded mb-4"
-                    onChange={handleChange} />
+        {patient && (
+          <div className="bg-white border border-[#E8EDEC] rounded-2xl p-5 mb-6">
+            <h3 className="text-xl font-semibold mb-3">
+              Patient Information
+            </h3>
 
-                <button
-                    onClick={submitRecord}
-                    className="bg-blue-700 text-white px-6 py-3 rounded"
-                >
-                    Save Record
-                </button>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <p><strong>Name:</strong> {patient.fullName}</p>
+              <p><strong>Patient No:</strong> {patient.patientNum}</p>
+              <p><strong>Age:</strong> {patient.age}</p>
+              <p><strong>Gender:</strong> {patient.gender}</p>
+              <p><strong>Contact:</strong> {patient.contactNumber}</p>
+              <p><strong>Address:</strong> {patient.address}</p>
             </div>
+          </div>
+        )}
+
+        <div className="bg-white border border-[#E8EDEC] rounded-2xl p-6">
+
+          {/* Symptoms */}
+          <textarea
+            name="symptoms"
+            value={record.symptoms}
+            onChange={handleChange}
+            placeholder="Symptoms"
+            rows="3"
+            className="w-full border p-3 mb-3 rounded-xl"
+          />
+
+          {/* Blood Pressure */}
+          <input
+            type="text"
+            name="bloodPressure"
+            value={record.bloodPressure}
+            onChange={handleChange}
+            placeholder="Blood Pressure (120/80)"
+            className="w-full border p-3 mb-3 rounded-xl"
+          />
+
+          {/* Temperature */}
+          <input
+            type="number"
+            step="0.1"
+            name="temperature"
+            value={record.temperature}
+            onChange={handleChange}
+            placeholder="Temperature (°C)"
+            className="w-full border p-3 mb-3 rounded-xl"
+          />
+
+          {/* Heart Rate */}
+          <input
+            type="number"
+            name="heartRate"
+            value={record.heartRate}
+            onChange={handleChange}
+            placeholder="Heart Rate (BPM)"
+            className="w-full border p-3 mb-3 rounded-xl"
+          />
+
+          {/* Weight */}
+          <input
+            type="number"
+            name="weight"
+            value={record.weight}
+            onChange={handleChange}
+            placeholder="Weight (KG)"
+            className="w-full border p-3 mb-3 rounded-xl"
+          />
+
+          {/* Notes */}
+          <textarea
+            name="notes"
+            value={record.notes}
+            onChange={handleChange}
+            placeholder="Notes"
+            rows="4"
+            className="w-full border p-3 mb-4 rounded-xl"
+          />
+
+          {/* Submit */}
+          <button
+            onClick={submitRecord}
+            className="bg-[#1C6E74] hover:bg-[#15565B] text-white px-6 py-3 rounded-xl font-medium"
+          >
+            Save Record & Analyze Risk
+          </button>
+
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default MedicalRecords;

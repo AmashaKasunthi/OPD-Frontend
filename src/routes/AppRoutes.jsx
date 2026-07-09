@@ -8,6 +8,7 @@ import AddPatient from "../pages/AddPatient";
 import MedicalRecords from "../pages/MedicalRecords";
 import ForgotPassword from "../pages/Forgotpassword";
 import EditPatient from "../pages/Editpatient";
+import RiskAnalysis from "../pages/RiskAnalysis";
 
 function AppRoutes() {
     return (
@@ -21,6 +22,7 @@ function AppRoutes() {
             <Route path="/medical-records" element={<MedicalRecords />} />
             <Route path="/edit-patient/:id" element={<EditPatient />} />
             <Route path="/medical-records/:patientId" element={<MedicalRecords />}/>
+            <Route path="/risk-analysis/:patientId" element={<RiskAnalysis />}/>
             
         </Routes>
     );

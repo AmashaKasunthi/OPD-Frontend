@@ -9,6 +9,8 @@ import MedicalRecords from "../pages/MedicalRecords";
 import ForgotPassword from "../pages/Forgotpassword";
 import EditPatient from "../pages/Editpatient";
 import RiskAnalysis from "../pages/RiskAnalysis";
+import UpdateMedicalRecord from "../pages/UpdateMedicalRecord";
+import Help from "../pages/Help";
 
 function AppRoutes() {
     return (
@@ -23,6 +25,8 @@ function AppRoutes() {
             <Route path="/edit-patient/:id" element={<EditPatient />} />
             <Route path="/medical-records/:patientId" element={<MedicalRecords />}/>
             <Route path="/risk-analysis/:patientId" element={<RiskAnalysis />}/>
+            <Route path="/update-medical-record/:patientId" element={<UpdateMedicalRecord />}/>
+            <Route path="/help" element={<Help />} />
             
         </Routes>
     );

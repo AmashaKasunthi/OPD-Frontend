@@ -12,6 +12,7 @@ import RiskAnalysis from "../pages/RiskAnalysis";
 import UpdateMedicalRecord from "../pages/UpdateMedicalRecord";
 import Help from "../pages/Help";
 import MonthlyReport from "../pages/MonthlyReport";
+import AnnualReport from "../pages/AnnualReport";
 
 function AppRoutes() {
     return (
@@ -29,6 +30,7 @@ function AppRoutes() {
             <Route path="/update-medical-record/:patientId" element={<UpdateMedicalRecord />}/>
             <Route path="/help" element={<Help />} />
             <Route path="/reports" element={<MonthlyReport />} />
+            <Route path="/annual-report" element={<AnnualReport/>} />
             
         </Routes>
     );

@@ -48,6 +48,23 @@ const QUICK_ACTIONS = [
   color: "#1C6E74",
   route: "/reports",
 },
+{
+  label: "Annual Report",
+  desc: "View yearly patient statistics",
+  icon: (
+    <svg
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 19h16M6 15l3-3 2 2 5-5 2 2" />
+    </svg>
+  ),
+  color: "#0F766E",
+  route: "/annual-report",
+},
   {
   label: "Help Section",
   desc: "View user guide and system instructions",

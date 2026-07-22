@@ -11,6 +11,7 @@ import EditPatient from "../pages/Editpatient";
 import RiskAnalysis from "../pages/RiskAnalysis";
 import UpdateMedicalRecord from "../pages/UpdateMedicalRecord";
 import Help from "../pages/Help";
+import MonthlyReport from "../pages/MonthlyReport";
 
 function AppRoutes() {
     return (
@@ -27,6 +28,7 @@ function AppRoutes() {
             <Route path="/risk-analysis/:patientId" element={<RiskAnalysis />}/>
             <Route path="/update-medical-record/:patientId" element={<UpdateMedicalRecord />}/>
             <Route path="/help" element={<Help />} />
+            <Route path="/reports" element={<MonthlyReport />} />
             
         </Routes>
     );

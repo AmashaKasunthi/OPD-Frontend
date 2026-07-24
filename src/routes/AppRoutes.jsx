@@ -14,6 +14,15 @@ import Help from "../pages/Help";
 import MonthlyReport from "../pages/MonthlyReport";
 import AnnualReport from "../pages/AnnualReport";
 
+import AdminLogin from "../pages/AdminLogin";
+import AdminDashboard from "../pages/AdminDashboard";
+import AddDoctor from "../pages/AddDoctor";
+import AddNurse from "../pages/AddNurse";
+import ViewUsers from "../pages/ViewUsers";
+import EditUser from "../pages/EditUser";
+import AdminReports from "../pages/AdminReports";
+
+
 function AppRoutes() {
     return (
         <Routes>
@@ -31,7 +40,15 @@ function AppRoutes() {
             <Route path="/help" element={<Help />} />
             <Route path="/reports" element={<MonthlyReport />} />
             <Route path="/annual-report" element={<AnnualReport/>} />
-            
+
+            <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/add-doctor" element={<AddDoctor />} />
+            <Route path="/add-nurse" element={<AddNurse />} />
+            <Route path="/view-users" element={<ViewUsers />} />
+            <Route path="/edit-user/:id" element={<EditUser />} />
+            <Route path="/admin-reports" element={<AdminReports />} />
+           
         </Routes>
     );
 }

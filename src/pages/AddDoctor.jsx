@@ -120,7 +120,7 @@ function AddDoctor() {
                                             : ""
                                     }
                                 >
-                                    <label className="block text-[11px] uppercase tracking-[0.1em] text-[#16302F]/50 mb-2">
+                                    <label className="block text-[11px] uppercase tracking-widest text-[#16302F]/50 mb-2">
                                         {field.label}
                                     </label>
 

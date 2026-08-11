@@ -79,7 +79,7 @@ function AddDoctor() {
 
             {/* Header */}
             <div className="bg-[#0E4548] text-white">
-                <div className="max-w-3xl mx-auto px-8 py-6">
+                <div className="max-w-5xl mx-auto px-8 py-6">
                     <button
                         onClick={() => navigate("/admin-dashboard")}
                         className="ad-mono text-xs uppercase tracking-wide text-[#9FC7C4] hover:text-white transition-colors mb-4 inline-flex items-center gap-1.5"

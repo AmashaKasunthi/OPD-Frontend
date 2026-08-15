@@ -75,7 +75,10 @@ function Login() {
 
     setLoading(true);
     try {
-      const response = await API.post("/auth/login", {
+      // Doctor/Nurse accounts live in the "users" table — this is a
+      // separate endpoint from the Admin Console login, which checks the
+      // "admin" table instead. Don't point this at /auth/login.
+      const response = await API.post("/auth/staff-login", {
         email,
         password,
         role,

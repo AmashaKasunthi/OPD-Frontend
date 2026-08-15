@@ -13,7 +13,7 @@ import {
     Legend,
 } from "chart.js";
 
-import { Bar, Pie } from "react-chartjs-2";
+import { Bar, Doughnut } from "react-chartjs-2";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
 
@@ -26,40 +26,49 @@ ChartJS.register(
     Legend
 );
 
+/* =========================================================
+   Design tokens
+   — Subject: an OPD monthly report read by clinicians and
+     admin staff. The system leans on the vocabulary of a
+     lab report / patient chart rather than a generic SaaS
+     dashboard: mono record numbers, tab-indexed months,
+     a vital-sign trace as the page's signature mark.
+========================================================= */
+
 const COLORS = {
+    ink: "#0F2A28",
+    inkSoft: "#4B615F",
+    paper: "#F2F6F4",
+    line: "#D8E4E1",
+    card: "#FFFFFF",
     primary: "#0E4548",
     primaryHover: "#15565B",
     teal: "#1C6E74",
     purple: "#6B3FA0",
-    green: "#5FAE86",
-    gold: "#D9A343",
-    red: "#E2685A",
+    green: "#4F9C74",
+    gold: "#C9922E",
+    red: "#C24B3F",
 };
 
-const PIE_COLORS = [
+const DISEASE_COLORS = [
     COLORS.teal,
     COLORS.purple,
     COLORS.gold,
     COLORS.red,
     COLORS.green,
     "#7E57C2",
-    "#FF9800",
+    "#B77A2E",
 ];
 
+const FONT_DISPLAY = "'Space Grotesk', 'Segoe UI', sans-serif";
+const FONT_BODY = "'Inter', 'Segoe UI', sans-serif";
+const FONT_MONO = "'IBM Plex Mono', 'Courier New', monospace";
+
 const MONTH_NAMES = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
 ];
+const MONTH_SHORT = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 
 const EMPTY_REPORT = {
     totalPatients: 0,
@@ -70,547 +79,458 @@ const EMPTY_REPORT = {
     diseaseCount: {},
 };
 
+/* Loads the two display fonts once. Safe to leave in the
+   component — the browser dedupes repeated <link> tags. */
+function useReportFonts() {
+    useEffect(() => {
+        const id = "opd-report-fonts";
+        if (document.getElementById(id)) return;
+        const link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        link.href =
+            "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500&display=swap";
+        document.head.appendChild(link);
+    }, []);
+}
 
-// ===============================
-// Summary Card
-// ===============================
-function SummaryCard({ label, value, bg }) {
+/* =========================================================
+   Signature element — a resting vital-sign trace.
+   Purely decorative, ties the "OPD" clinical subject to the
+   page without leaning on medical iconography clichés.
+========================================================= */
+function VitalTrace({ color = COLORS.teal, height = 34 }) {
     return (
-        <div className={`rounded-xl p-6 ${bg}`}>
-            <h3 className="text-gray-600">
-                {label}
-            </h3>
+        <svg
+            viewBox="0 0 600 40"
+            width="100%"
+            height={height}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+        >
+            <polyline
+                points="0,20 130,20 148,20 160,4 172,34 184,10 196,20 220,20 600,20"
+                fill="none"
+                stroke={color}
+                strokeWidth="2"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity="0.55"
+            />
+        </svg>
+    );
+}
 
-            <p className="text-3xl font-bold mt-2">
+/* ===============================
+   Vital card — summary metric
+================================ */
+function VitalCard({ label, value, accent }) {
+    return (
+        <div
+            style={{
+                background: COLORS.card,
+                borderLeft: `4px solid ${accent}`,
+                borderRadius: 0,
+                padding: "16px 18px",
+            }}
+        >
+            <p
+                style={{
+                    margin: 0,
+                    fontFamily: FONT_MONO,
+                    fontSize: 11,
+                    letterSpacing: "0.08em",
+                    color: COLORS.inkSoft,
+                    textTransform: "uppercase",
+                }}
+            >
+                {label}
+            </p>
+            <p
+                style={{
+                    margin: "6px 0 0",
+                    fontFamily: FONT_DISPLAY,
+                    fontWeight: 600,
+                    fontSize: 30,
+                    color: COLORS.ink,
+                }}
+            >
                 {value}
             </p>
         </div>
     );
 }
 
-
-// ===============================
-// Chart Card
-// ===============================
-function ChartCard({ title, children }) {
+/* ===============================
+   Chart card
+================================ */
+function ChartCard({ eyebrow, title, children }) {
     return (
-        <div className="bg-white rounded-xl shadow p-6">
-
+        <div
+            style={{
+                background: COLORS.card,
+                border: `1px solid ${COLORS.line}`,
+                padding: "22px 24px 24px",
+            }}
+        >
+            <p
+                style={{
+                    margin: 0,
+                    fontFamily: FONT_MONO,
+                    fontSize: 11,
+                    letterSpacing: "0.08em",
+                    color: COLORS.teal,
+                    textTransform: "uppercase",
+                }}
+            >
+                {eyebrow}
+            </p>
             <h2
-                className="text-xl font-semibold mb-5"
-                style={{ color: COLORS.primary }}
+                style={{
+                    margin: "4px 0 18px",
+                    fontFamily: FONT_DISPLAY,
+                    fontWeight: 600,
+                    fontSize: 18,
+                    color: COLORS.ink,
+                }}
             >
                 {title}
             </h2>
-
             {children}
-
         </div>
     );
 }
 
-
-// ===============================
-// Monthly Report
-// ===============================
+/* ===============================
+   Monthly Report
+================================ */
 export default function MonthlyReport() {
+    useReportFonts();
 
-    // Navigation
     const navigate = useNavigate();
-
     const now = new Date();
 
-    const [year, setYear] = useState(
-        now.getFullYear()
-    );
-
-    const [month, setMonth] = useState(
-        now.getMonth() + 1
-    );
-
-    const [report, setReport] = useState(
-        EMPTY_REPORT
-    );
-
+    const [year, setYear] = useState(now.getFullYear());
+    const [month, setMonth] = useState(now.getMonth() + 1);
+    const [report, setReport] = useState(EMPTY_REPORT);
     const [loading, setLoading] = useState(true);
 
-
-    // ===============================
-    // Load Report
-    // ===============================
     useEffect(() => {
-
         let cancelled = false;
 
         async function loadReport() {
-
             setLoading(true);
-
             try {
-
                 const { data } = await API.get(
                     `/reports/monthly?year=${year}&month=${month}`
                 );
-
-                if (!cancelled) {
-                    setReport(data);
-                }
-
+                if (!cancelled) setReport(data);
             } catch (error) {
-
-                console.error(
-                    "Error loading monthly report:",
-                    error
-                );
-
+                console.error("Error loading monthly report:", error);
             } finally {
-
-                if (!cancelled) {
-                    setLoading(false);
-                }
-
+                if (!cancelled) setLoading(false);
             }
         }
 
         loadReport();
-
-        return () => {
-            cancelled = true;
-        };
-
+        return () => { cancelled = true; };
     }, [year, month]);
 
+    const diseaseLabels = Object.keys(report.diseaseCount);
+    const diseaseValues = Object.values(report.diseaseCount);
 
-    // ===============================
-    // Disease Chart
-    // ===============================
     const diseaseChartData = {
-
-        labels: Object.keys(
-            report.diseaseCount
-        ),
-
+        labels: diseaseLabels,
         datasets: [
             {
-                label: "Disease Cases",
-
-                data: Object.values(
-                    report.diseaseCount
+                label: "Cases",
+                data: diseaseValues,
+                backgroundColor: diseaseLabels.map(
+                    (_, i) => DISEASE_COLORS[i % DISEASE_COLORS.length]
                 ),
-
-                backgroundColor: PIE_COLORS,
+                borderRadius: 3,
+                maxBarThickness: 34,
             },
         ],
     };
 
+    const diseaseChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: COLORS.ink,
+                titleFont: { family: FONT_MONO, size: 11 },
+                bodyFont: { family: FONT_MONO, size: 12 },
+                padding: 10,
+            },
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { font: { family: FONT_BODY, size: 11 }, color: COLORS.inkSoft },
+            },
+            y: {
+                grid: { color: COLORS.line },
+                ticks: { font: { family: FONT_MONO, size: 11 }, color: COLORS.inkSoft },
+                beginAtZero: true,
+            },
+        },
+    };
 
-    // ===============================
-    // Risk Chart
-    // ===============================
     const riskChartData = {
-
-        labels: [
-            "Low",
-            "Medium",
-            "High",
-        ],
-
+        labels: ["Low", "Medium", "High"],
         datasets: [
             {
-                data: [
-                    report.lowRisk,
-                    report.mediumRisk,
-                    report.highRisk,
-                ],
-
-                backgroundColor: [
-                    COLORS.green,
-                    COLORS.gold,
-                    COLORS.red,
-                ],
+                data: [report.lowRisk, report.mediumRisk, report.highRisk],
+                backgroundColor: [COLORS.green, COLORS.gold, COLORS.red],
+                borderColor: COLORS.card,
+                borderWidth: 3,
             },
         ],
     };
 
-
-    // ===============================
-    // Summary Cards
-    // ===============================
-    const summaryCards = [
-
-        {
-            label: "Total Patients",
-            value: report.totalPatients,
-            bg: "bg-[#EAF6F5]",
+    const riskChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "62%",
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    font: { family: FONT_BODY, size: 12 },
+                    color: COLORS.ink,
+                    usePointStyle: true,
+                    pointStyle: "rectRounded",
+                    padding: 16,
+                },
+            },
+            tooltip: {
+                backgroundColor: COLORS.ink,
+                bodyFont: { family: FONT_MONO, size: 12 },
+                padding: 10,
+            },
         },
+    };
 
-        {
-            label: "Medical Records",
-            value: report.totalMedicalRecords,
-            bg: "bg-[#F8F3E9]",
-        },
-
-        {
-            label: "Low Risk",
-            value: report.lowRisk,
-            bg: "bg-green-100",
-        },
-
-        {
-            label: "Medium Risk",
-            value: report.mediumRisk,
-            bg: "bg-yellow-100",
-        },
-
-        {
-            label: "High Risk",
-            value: report.highRisk,
-            bg: "bg-red-100",
-        },
-
+    const vitalCards = [
+        { label: "Total patients", value: report.totalPatients, accent: COLORS.primary },
+        { label: "Medical records", value: report.totalMedicalRecords, accent: COLORS.teal },
+        { label: "Low risk", value: report.lowRisk, accent: COLORS.green },
+        { label: "Medium risk", value: report.mediumRisk, accent: COLORS.gold },
+        { label: "High risk", value: report.highRisk, accent: COLORS.red },
     ];
 
-
-    // ===============================
-    // Download PDF
-    // ===============================
     function downloadPDF() {
-
         const doc = new jsPDF();
 
         doc.setFontSize(20);
-
-        doc.text(
-            "OPD AI System",
-            14,
-            20
-        );
-
+        doc.text("OPD AI System", 14, 20);
         doc.setFontSize(15);
-
-        doc.text(
-            "Monthly Report",
-            14,
-            30
-        );
-
+        doc.text("Monthly Report", 14, 30);
         doc.setFontSize(12);
+        doc.text(`Year : ${year}`, 14, 40);
+        doc.text(`Month : ${MONTH_NAMES[month - 1]}`, 70, 40);
 
-        doc.text(
-            `Year : ${year}`,
-            14,
-            40
-        );
-
-        doc.text(
-            `Month : ${MONTH_NAMES[month - 1]}`,
-            70,
-            40
-        );
-
-
-        // Summary table
         autoTable(doc, {
-
             startY: 50,
-
-            head: [
-                ["Category", "Value"]
-            ],
-
+            head: [["Category", "Value"]],
             body: [
-
-                [
-                    "Total Patients",
-                    report.totalPatients
-                ],
-
-                [
-                    "Medical Records",
-                    report.totalMedicalRecords
-                ],
-
-                [
-                    "Low Risk",
-                    report.lowRisk
-                ],
-
-                [
-                    "Medium Risk",
-                    report.mediumRisk
-                ],
-
-                [
-                    "High Risk",
-                    report.highRisk
-                ],
-
+                ["Total Patients", report.totalPatients],
+                ["Medical Records", report.totalMedicalRecords],
+                ["Low Risk", report.lowRisk],
+                ["Medium Risk", report.mediumRisk],
+                ["High Risk", report.highRisk],
             ],
-
         });
 
-
-        // Disease table
         autoTable(doc, {
-
-            startY:
-                doc.lastAutoTable.finalY + 15,
-
-            head: [
-                ["Disease", "Cases"]
-            ],
-
-            body:
-                Object.entries(
-                    report.diseaseCount
-                ),
-
+            startY: doc.lastAutoTable.finalY + 15,
+            head: [["Disease", "Cases"]],
+            body: Object.entries(report.diseaseCount),
         });
 
-
-        doc.save(
-            `Monthly_Report_${year}_${month}.pdf`
-        );
+        doc.save(`Monthly_Report_${year}_${month}.pdf`);
     }
 
+    const pageBg = {
+        background: COLORS.paper,
+        backgroundImage: `linear-gradient(${COLORS.line} 1px, transparent 1px), linear-gradient(90deg, ${COLORS.line} 1px, transparent 1px)`,
+        backgroundSize: "28px 28px",
+        minHeight: "100vh",
+        fontFamily: FONT_BODY,
+    };
 
-    // ===============================
-    // Loading
-    // ===============================
     if (loading) {
-
         return (
             <>
                 <Navbar />
-
-                <div className="flex justify-center items-center h-screen">
-
-                    Loading Monthly Report...
-
+                <div style={{ ...pageBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ fontFamily: FONT_MONO, color: COLORS.inkSoft, fontSize: 13, letterSpacing: "0.06em" }}>
+                        LOADING MONTHLY REPORT…
+                    </p>
                 </div>
             </>
         );
     }
 
-
-    // ===============================
-    // Page
-    // ===============================
     return (
         <>
             <Navbar />
 
-            <div className="max-w-7xl mx-auto p-8">
+            <div style={pageBg}>
+                <div style={{ maxWidth: 1180, margin: "0 auto", padding: "40px 32px 64px" }}>
 
-                {/* =========================
-                    Back to Dashboard Button
-                ========================== */}
-
-                <button
-                    type="button"
-                    onClick={() =>
-                        navigate("/admin-dashboard")
-                    }
-                    className="
-                        mb-6
-                        bg-[#0E4548]
-                        hover:bg-[#15565B]
-                        text-white
-                        px-5
-                        py-2.5
-                        rounded-lg
-                        font-semibold
-                        transition
-                    "
-                >
-                    ← Back to Dashboard
-                </button>
-
-
-                {/* =========================
-                    Page Title
-                ========================== */}
-
-                <h1
-                    className="text-3xl font-bold mb-8"
-                    style={{
-                        color: COLORS.primary,
-                    }}
-                >
-                    Monthly Report
-                </h1>
-
-
-                {/* =========================
-                    Year & Month Selection
-                ========================== */}
-
-                <div className="bg-white rounded-xl shadow p-5 mb-8 flex gap-4">
-
-                    {/* Year */}
-
-                    <div>
-
-                        <label
-                            htmlFor="year"
-                            className="block text-sm font-medium mb-2"
-                        >
-                            Year
-                        </label>
-
-                        <input
-                            id="year"
-                            type="number"
-                            value={year}
-                            onChange={(e) =>
-                                setYear(
-                                    Number(e.target.value)
-                                )
-                            }
-                            className="
-                                border
-                                rounded-lg
-                                p-2
-                            "
-                        />
-
-                    </div>
-
-
-                    {/* Month */}
-
-                    <div>
-
-                        <label
-                            htmlFor="month"
-                            className="block text-sm font-medium mb-2"
-                        >
-                            Month
-                        </label>
-
-                        <select
-                            id="month"
-                            value={month}
-                            onChange={(e) =>
-                                setMonth(
-                                    Number(e.target.value)
-                                )
-                            }
-                            className="
-                                border
-                                rounded-lg
-                                p-2
-                            "
-                        >
-
-                            {MONTH_NAMES.map(
-                                (name, index) => (
-
-                                    <option
-                                        key={name}
-                                        value={index + 1}
-                                    >
-                                        {name}
-                                    </option>
-
-                                )
-                            )}
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-                {/* =========================
-                    Summary Cards
-                ========================== */}
-
-                <div className="grid md:grid-cols-5 gap-5">
-
-                    {summaryCards.map(
-                        (card) => (
-
-                            <SummaryCard
-                                key={card.label}
-                                {...card}
-                            />
-
-                        )
-                    )}
-
-                </div>
-
-
-                {/* =========================
-                    Charts
-                ========================== */}
-
-                <div className="grid lg:grid-cols-2 gap-8 mt-10">
-
-                    {/* Disease Distribution */}
-
-                    <ChartCard title="Disease Distribution">
-
-                        <Bar
-                            data={
-                                diseaseChartData
-                            }
-                        />
-
-                    </ChartCard>
-
-
-                    {/* Risk Distribution */}
-
-                    <ChartCard title="Risk Distribution">
-
-                        <Pie
-                            data={
-                                riskChartData
-                            }
-                        />
-
-                    </ChartCard>
-
-                </div>
-
-
-                {/* =========================
-                    Download PDF
-                ========================== */}
-
-                <div className="flex justify-end mt-8">
-
+                    {/* Back */}
                     <button
-                        onClick={downloadPDF}
-                        className="
-                            text-white
-                            px-6
-                            py-3
-                            rounded-lg
-                            font-semibold
-                            transition-colors
-                        "
+                        type="button"
+                        onClick={() => navigate(-1)}
                         style={{
-                            backgroundColor:
-                                COLORS.primary,
+                            fontFamily: FONT_MONO,
+                            fontSize: 12,
+                            letterSpacing: "0.04em",
+                            color: COLORS.primary,
+                            background: "transparent",
+                            border: "none",
+                            padding: "6px 0",
+                            marginBottom: 24,
+                            cursor: "pointer",
                         }}
-                        onMouseEnter={(e) =>
-                            (e.currentTarget.style.backgroundColor =
-                                COLORS.primaryHover)
-                        }
-                        onMouseLeave={(e) =>
-                            (e.currentTarget.style.backgroundColor =
-                                COLORS.primary)
-                        }
                     >
-                        Download PDF
+                        ← BACK TO DASHBOARD
                     </button>
 
-                </div>
+                    {/* Header */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
+                        <div>
+                            <p style={{ margin: 0, fontFamily: FONT_MONO, fontSize: 12, letterSpacing: "0.12em", color: COLORS.teal }}>
+                                OPD · AI SYSTEM
+                            </p>
+                            <h1 style={{ margin: "6px 0 0", fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 34, color: COLORS.ink }}>
+                                Monthly report
+                            </h1>
+                        </div>
 
+                        <div style={{ textAlign: "right", fontFamily: FONT_MONO, fontSize: 12, color: COLORS.inkSoft }}>
+                            <div>RPT-{year}{String(month).padStart(2, "0")}</div>
+                            <div style={{ color: COLORS.inkSoft }}>{MONTH_NAMES[month - 1].toUpperCase()} {year}</div>
+                        </div>
+                    </div>
+
+                    <VitalTrace color={COLORS.teal} />
+
+                    {/* Selection */}
+                    <div style={{ background: COLORS.card, border: `1px solid ${COLORS.line}`, padding: "18px 20px", marginBottom: 32 }}>
+                        <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "flex-end" }}>
+                            <div>
+                                <label
+                                    htmlFor="year"
+                                    style={{ display: "block", fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", color: COLORS.inkSoft, marginBottom: 8, textTransform: "uppercase" }}
+                                >
+                                    Year
+                                </label>
+                                <input
+                                    id="year"
+                                    type="number"
+                                    value={year}
+                                    onChange={(e) => setYear(Number(e.target.value))}
+                                    style={{
+                                        fontFamily: FONT_MONO,
+                                        fontSize: 15,
+                                        color: COLORS.ink,
+                                        border: `1px solid ${COLORS.line}`,
+                                        padding: "8px 10px",
+                                        width: 100,
+                                        outline: "none",
+                                    }}
+                                />
+                            </div>
+
+                            <div style={{ flex: 1, minWidth: 280 }}>
+                                <label
+                                    style={{ display: "block", fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.08em", color: COLORS.inkSoft, marginBottom: 8, textTransform: "uppercase" }}
+                                >
+                                    Month
+                                </label>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                                    {MONTH_SHORT.map((short, index) => {
+                                        const active = index + 1 === month;
+                                        return (
+                                            <button
+                                                key={short}
+                                                type="button"
+                                                onClick={() => setMonth(index + 1)}
+                                                aria-pressed={active}
+                                                style={{
+                                                    fontFamily: FONT_MONO,
+                                                    fontSize: 11,
+                                                    letterSpacing: "0.05em",
+                                                    padding: "7px 10px",
+                                                    border: `1px solid ${active ? COLORS.primary : COLORS.line}`,
+                                                    background: active ? COLORS.primary : "transparent",
+                                                    color: active ? "#F2F6F4" : COLORS.inkSoft,
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                {short}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Vital cards */}
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 1, background: COLORS.line, border: `1px solid ${COLORS.line}`, marginBottom: 40 }}>
+                        {vitalCards.map((card) => (
+                            <VitalCard key={card.label} {...card} />
+                        ))}
+                    </div>
+
+                    {/* Charts */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 24, marginBottom: 40 }}>
+                        <ChartCard eyebrow="By condition" title="Disease distribution">
+                            <div style={{ height: 280 }}>
+                                <Bar data={diseaseChartData} options={diseaseChartOptions} />
+                            </div>
+                        </ChartCard>
+
+                        <ChartCard eyebrow="By severity" title="Risk distribution">
+                            <div style={{ height: 280 }}>
+                                <Doughnut data={riskChartData} options={riskChartOptions} />
+                            </div>
+                        </ChartCard>
+                    </div>
+
+                    {/* Footer / export */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: `1px solid ${COLORS.line}`, paddingTop: 20, flexWrap: "wrap", gap: 12 }}>
+                        <p style={{ margin: 0, fontFamily: FONT_MONO, fontSize: 11, color: COLORS.inkSoft, letterSpacing: "0.04em" }}>
+                            GENERATED {now.toLocaleDateString()} · OPD AI SYSTEM
+                        </p>
+
+                        <button
+                            onClick={downloadPDF}
+                            style={{
+                                fontFamily: FONT_BODY,
+                                fontWeight: 500,
+                                fontSize: 14,
+                                color: "#F2F6F4",
+                                background: COLORS.primary,
+                                border: "none",
+                                padding: "12px 22px",
+                                cursor: "pointer",
+                                transition: "background-color 0.15s ease",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.primaryHover)}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.primary)}
+                        >
+                            Download PDF
+                        </button>
+                    </div>
+
+                </div>
             </div>
         </>
     );

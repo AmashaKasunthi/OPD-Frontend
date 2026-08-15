@@ -520,7 +520,7 @@ export default function AdminLogin() {
               onMouseLeave={(e) => (e.currentTarget.style.color = palette.textFaint)}
             >
               <ArrowLeft size={14} />
-              Back to sign in
+              Back to Sign in
             </button>
 
             <h2

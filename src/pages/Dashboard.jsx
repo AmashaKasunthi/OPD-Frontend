@@ -310,7 +310,7 @@ export default function Dashboard() {
                 Recent Activity
               </h2>
               <div className="flex gap-1">
-                {["today", "week"].map((t) => (
+                {["today"].map((t) => (
                   <button
                     key={t}
                     onClick={() => setActiveTab(t)}

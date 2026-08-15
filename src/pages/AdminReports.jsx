@@ -20,7 +20,7 @@ function AdminReports() {
     }
   };
 
-  const totalDoctors = users.filter((user) => user.role === "Doctor").length;
+  const totalDoctors = users.filter((user) => user.role === "DOCTOR").length;
 
   const totalNurses = users.filter((user) => user.role === "NURSE").length;
 

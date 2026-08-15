@@ -3,11 +3,36 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 const FIELDS = [
-    { name: "fullName", label: "Full name", type: "text", placeholder: "Dr. Ayesha Fernando" },
-    { name: "email", label: "Email", type: "email", placeholder: "ayesha.fernando@opd.lk" },
-    { name: "password", label: "Password", type: "password", placeholder: "Temporary password" },
-    { name: "specialization", label: "Specialization", type: "text", placeholder: "Cardiology" },
-    { name: "contactNumber", label: "Contact number", type: "text", placeholder: "+94 71 234 5678" },
+    {
+        name: "fullName",
+        label: "Full name",
+        type: "text",
+        placeholder: "Dr. Ayesha Fernando",
+    },
+    {
+        name: "email",
+        label: "Email",
+        type: "email",
+        placeholder: "ayesha.fernando@opd.lk",
+    },
+    {
+        name: "password",
+        label: "Password",
+        type: "password",
+        placeholder: "Temporary password",
+    },
+    {
+        name: "specialization",
+        label: "Specialization",
+        type: "text",
+        placeholder: "Cardiology",
+    },
+    {
+        name: "contactNumber",
+        label: "Contact number",
+        type: "text",
+        placeholder: "+94 71 234 5678",
+    },
 ];
 
 function AddDoctor() {
@@ -22,48 +47,126 @@ function AddDoctor() {
     });
 
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const handleChange = (e) => {
-        setDoctor({
-            ...doctor,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+
+        setDoctor((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     };
 
     const saveDoctor = async (e) => {
         e.preventDefault();
 
+        setError("");
+
+        // Basic validation
+        if (
+            !doctor.fullName ||
+            !doctor.email ||
+            !doctor.password ||
+            !doctor.specialization ||
+            !doctor.contactNumber
+        ) {
+            setError("Please fill in all fields.");
+            return;
+        }
+
         setLoading(true);
 
         try {
-            await API.post("/admin/users", {
-                ...doctor,
-                role: "Doctor",
-            });
+            /*
+             * IMPORTANT:
+             * The backend /doctor endpoint automatically sets:
+             * role = DOCTOR
+             *
+             * Therefore, we don't need to send the role from here.
+             */
+            const doctorData = {
+                fullName: doctor.fullName.trim(),
+                email: doctor.email.trim(),
+                password: doctor.password,
+                specialization: doctor.specialization.trim(),
+                contactNumber: doctor.contactNumber.trim(),
+            };
+
+            console.log("Adding doctor:", doctorData);
+
+            const response = await API.post(
+                "/admin/doctor",
+                doctorData
+            );
+
+            console.log("Doctor added successfully:", response.data);
 
             alert("Doctor added successfully.");
 
+            // Clear form
+            setDoctor({
+                fullName: "",
+                email: "",
+                password: "",
+                specialization: "",
+                contactNumber: "",
+            });
+
             navigate("/view-users");
-        } catch (error) {
-            console.error(error);
 
-            alert("Failed to add doctor.");
+        } catch (err) {
+            console.error("Error adding doctor:", err);
+
+            if (err.response) {
+                console.error(
+                    "Backend response:",
+                    err.response.data
+                );
+
+                if (err.response.data?.message) {
+                    setError(err.response.data.message);
+                } else if (typeof err.response.data === "string") {
+                    setError(err.response.data);
+                } else {
+                    setError("Failed to add doctor.");
+                }
+            } else if (err.request) {
+                setError(
+                    "Cannot connect to the server. Please make sure the Spring Boot backend is running."
+                );
+            } else {
+                setError("Failed to add doctor.");
+            }
+
+        } finally {
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const fonts = (
         <style>{`
             @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-            .ad-display { font-family: 'Fraunces', serif; font-optical-sizing: auto; }
-            .ad-body { font-family: 'IBM Plex Sans', sans-serif; }
-            .ad-mono { font-family: 'IBM Plex Mono', monospace; }
+
+            .ad-display {
+                font-family: 'Fraunces', serif;
+                font-optical-sizing: auto;
+            }
+
+            .ad-body {
+                font-family: 'IBM Plex Sans', sans-serif;
+            }
+
+            .ad-mono {
+                font-family: 'IBM Plex Mono', monospace;
+            }
+
             .ad-input {
                 font-family: 'IBM Plex Sans', sans-serif;
                 border: 1px solid #E4DFD1;
                 background: #FBFAF7;
             }
+
             .ad-input:focus {
                 outline: none;
                 border-color: #1C6E74;
@@ -75,12 +178,15 @@ function AddDoctor() {
 
     return (
         <div className="ad-body min-h-screen bg-[#F6F4EF]">
+
             {fonts}
 
             {/* Header */}
             <div className="bg-[#0E4548] text-white">
                 <div className="max-w-5xl mx-auto px-8 py-6">
+
                     <button
+                        type="button"
                         onClick={() => navigate("/admin-dashboard")}
                         className="ad-mono text-xs uppercase tracking-wide text-[#9FC7C4] hover:text-white transition-colors mb-4 inline-flex items-center gap-1.5"
                     >
@@ -88,38 +194,58 @@ function AddDoctor() {
                     </button>
 
                     <div className="flex items-center gap-4">
+
                         <div
                             className="ad-mono flex items-center justify-center h-11 w-11 rounded-lg text-sm font-medium shrink-0"
-                            style={{ backgroundColor: "#E4F0EF", color: "#1C6E74" }}
+                            style={{
+                                backgroundColor: "#E4F0EF",
+                                color: "#1C6E74",
+                            }}
                         >
                             DR
                         </div>
+
                         <div>
                             <p className="ad-mono text-[11px] tracking-[0.2em] uppercase text-[#9FC7C4] mb-1">
                                 New registration
                             </p>
+
                             <h1 className="ad-display text-2xl text-white leading-tight">
                                 Add doctor
                             </h1>
                         </div>
+
                     </div>
                 </div>
             </div>
 
             {/* Form */}
             <div className="max-w-3xl mx-auto px-8 py-10">
+
                 <div className="bg-white rounded-2xl border border-[#E4DFD1] p-8">
+
+                    {error && (
+                        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            {error}
+                        </div>
+                    )}
+
                     <form onSubmit={saveDoctor}>
+
                         <div className="grid sm:grid-cols-2 gap-5">
+
                             {FIELDS.map((field) => (
+
                                 <div
                                     key={field.name}
                                     className={
-                                        field.name === "fullName" || field.name === "email"
+                                        field.name === "fullName" ||
+                                        field.name === "email"
                                             ? "sm:col-span-2"
                                             : ""
                                     }
                                 >
+
                                     <label className="block text-[11px] uppercase tracking-widest text-[#16302F]/50 mb-2">
                                         {field.label}
                                     </label>
@@ -131,30 +257,44 @@ function AddDoctor() {
                                         onChange={handleChange}
                                         placeholder={field.placeholder}
                                         required
-                                        className="ad-input w-full rounded-lg px-4 py-3 text-[15px] text-[#16302F] placeholder:text-[#16302F]/30 transition-shadow"
+                                        disabled={loading}
+                                        className="ad-input w-full rounded-lg px-4 py-3 text-[15px] text-[#16302F] placeholder:text-[#16302F]/30 transition-shadow disabled:opacity-60"
                                     />
+
                                 </div>
+
                             ))}
+
                         </div>
 
+                        {/* Buttons */}
                         <div className="flex gap-3 mt-8 pt-6 border-t border-[#E4DFD1]">
+
                             <button
                                 type="submit"
                                 disabled={loading}
                                 className="flex-1 bg-[#1C6E74] hover:bg-[#0E4548] disabled:opacity-60 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors"
                             >
-                                {loading ? "Saving…" : "Save doctor"}
+                                {loading
+                                    ? "Saving..."
+                                    : "Save doctor"}
                             </button>
 
                             <button
                                 type="button"
-                                onClick={() => navigate("/admin-dashboard")}
-                                className="flex-1 border border-[#E4DFD1] hover:border-[#C9C2AE] hover:bg-[#F6F4EF] text-[#16302F] py-3 rounded-lg font-medium transition-colors"
+                                disabled={loading}
+                                onClick={() =>
+                                    navigate("/admin-dashboard")
+                                }
+                                className="flex-1 border border-[#E4DFD1] hover:border-[#C9C2AE] hover:bg-[#F6F4EF] text-[#16302F] py-3 rounded-lg font-medium transition-colors disabled:opacity-60"
                             >
                                 Cancel
                             </button>
+
                         </div>
+
                     </form>
+
                 </div>
             </div>
         </div>

@@ -139,7 +139,7 @@ function AdminDashboard() {
               </p>
 
               <h2 className="ad-display text-3xl md:text-4xl font-medium">
-                OPD Administration
+                OPD Resource Management
               </h2>
 
               <p className="mt-3 text-white/90 text-sm md:text-base max-w-xl">

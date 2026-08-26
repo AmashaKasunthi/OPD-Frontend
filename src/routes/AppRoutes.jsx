@@ -22,33 +22,192 @@ import ViewUsers from "../pages/ViewUsers";
 import EditUser from "../pages/EditUser";
 import AdminReports from "../pages/AdminReports";
 
+import ProtectedRoute from "./ProtectedRoute";
+
 
 function AppRoutes() {
     return (
         <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/patients" element={<Patients />} />
-            <Route path="/add-patient" element={<AddPatient />} />
-            <Route path="/medical-records" element={<MedicalRecords />} />
-            <Route path="/edit-patient/:id" element={<EditPatient />} />
-            <Route path="/medical-records/:patientId" element={<MedicalRecords />}/>
-            <Route path="/risk-analysis/:patientId" element={<RiskAnalysis />}/>
-            <Route path="/update-medical-record/:patientId" element={<UpdateMedicalRecord />}/>
-            <Route path="/help" element={<Help />} />
-            <Route path="/reports" element={<MonthlyReport />} />
-            <Route path="/annual-report" element={<AnnualReport/>} />
 
-            <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/add-doctor" element={<AddDoctor />} />
-            <Route path="/add-nurse" element={<AddNurse />} />
-            <Route path="/view-users" element={<ViewUsers />} />
-            <Route path="/edit-user/:id" element={<EditUser />} />
-            <Route path="/admin-reports" element={<AdminReports />} />
-           
+            {/* =========================
+                PUBLIC ROUTES
+            ========================== */}
+
+            <Route path="/" element={<Login />} />
+
+            <Route
+                path="/forgot-password"
+                element={<ForgotPassword />}
+            />
+
+            <Route
+                path="/admin-login"
+                element={<AdminLogin />}
+            />
+
+
+            {/* =========================
+                DOCTOR / NURSE ROUTES
+            ========================== */}
+
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/patients"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <Patients />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/add-patient"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <AddPatient />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/medical-records"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <MedicalRecords />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/edit-patient/:id"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <EditPatient />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/medical-records/:patientId"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <MedicalRecords />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/risk-analysis/:patientId"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <RiskAnalysis />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/update-medical-record/:patientId"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <UpdateMedicalRecord />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/help"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <Help />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/reports"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <MonthlyReport />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/annual-report"
+                element={
+                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                        <AnnualReport />
+                    </ProtectedRoute>
+                }
+            />
+
+
+            {/* =========================
+                ADMIN ROUTES
+            ========================== */}
+
+            <Route
+                path="/admin-dashboard"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AdminDashboard />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/add-doctor"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AddDoctor />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/add-nurse"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AddNurse />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/view-users"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <ViewUsers />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/edit-user/:id"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <EditUser />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/admin-reports"
+                element={
+                    <ProtectedRoute allowedRoles={["ADMIN"]}>
+                        <AdminReports />
+                    </ProtectedRoute>
+                }
+            />
+
         </Routes>
     );
 }

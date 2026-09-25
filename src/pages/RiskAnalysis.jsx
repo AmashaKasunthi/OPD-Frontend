@@ -54,19 +54,49 @@ function RiskAnalysis() {
         loadResult();
     }, []);
 
-    const loadResult = async () => {
-        try {
-            const response = await API.get(
-                `/medical-records/patient/${patientId}`
-            );
-            console.log("API Response:", response.data);
-            setRecord(response.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
+    
+
+const loadResult = async () => {
+    try {
+        setLoading(true);
+
+        const response = await API.get(
+            `/medical-records/patient/${patientId}`
+        );
+
+        console.log("API Response:", response.data);
+
+        if (Array.isArray(response.data) && response.data.length > 0) {
+
+            // Backend returns newest record first
+            const latestRecord = response.data[0];
+
+            console.log("Latest Medical Record:", latestRecord);
+
+            setRecord(latestRecord);
+
+        } else {
+
+            console.log("No medical records found.");
+
+            setRecord(null);
         }
-    };
+
+    } catch (err) {
+
+        console.error(
+            "Error loading risk analysis:",
+            err
+        );
+
+        setRecord(null);
+
+    } finally {
+        setLoading(false);
+    }
+};
+
+
 
     const fonts = (
         <style>{`

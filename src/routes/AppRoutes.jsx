@@ -134,7 +134,7 @@ function AppRoutes() {
             <Route
                 path="/reports"
                 element={
-                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                    <ProtectedRoute allowedRoles={["ADMIN","DOCTOR", "NURSE"]}>
                         <MonthlyReport />
                     </ProtectedRoute>
                 }
@@ -143,7 +143,7 @@ function AppRoutes() {
             <Route
                 path="/annual-report"
                 element={
-                    <ProtectedRoute allowedRoles={["DOCTOR", "NURSE"]}>
+                    <ProtectedRoute allowedRoles={["ADMIN","DOCTOR", "NURSE"]}>
                         <AnnualReport />
                     </ProtectedRoute>
                 }
